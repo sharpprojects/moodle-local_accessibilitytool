@@ -16,8 +16,6 @@
 
 namespace local_accessibilitytool\local\hooks;
 
-use stdClass;
-
 /**
  * Class hook_callbacks
  *
@@ -37,10 +35,25 @@ class extend_user_menu {
         if (!$enabled) {
             return;
         }
-        $item = new stdClass();
+        $title = get_string('accessibilitytool', 'local_accessibilitytool');
+        $url = new \core\url('/local/accessibilitytool/manage.php');
+
+        // Moodle 5.3 introduced typed user menu items and deprecated add_navitem().
+        if (method_exists($hook, 'add_menu_item')) {
+            $hook->add_menu_item(new \core_user\output\user_action_menu\link(
+                $url,
+                $title,
+                null,
+                new \core\output\pix_icon('e/accessibility_checker', ''),
+            ));
+            return;
+        }
+
+        // Keep compatibility with Moodle versions that still use the legacy API.
+        $item = new \stdClass();
         $item->itemtype = 'link';
-        $item->title = get_string('accessibilitytool', 'local_accessibilitytool');
-        $item->url = new \core\url('/local/accessibilitytool/manage.php');
+        $item->title = $title;
+        $item->url = $url;
         $item->pix = 'e/accessibility_checker';
         $hook->add_navitem($item);
     }
